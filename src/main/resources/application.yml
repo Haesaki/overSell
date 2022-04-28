@@ -1,0 +1,5 @@
+spring:
+  config:
+    activate:
+      # 这里将dev改成github 并且在application-dev.yml中配置上你的配置信息
+      on-profile: dev
