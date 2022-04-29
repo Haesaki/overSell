@@ -30,22 +30,22 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public int placeOrder(Order order) {
-        if(!order.correctOrder())
+        if (!order.correctOrder())
             return 0;
         return 1;
     }
 
     @Override
-    public synchronized int placeOrderByOldWay(Order order){
+    public synchronized int placeOrderByOldWay(Order order) {
         TransactionStatus transactionStatus = platformTransactionManager.getTransaction(transactionDefinition);
         platformTransactionManager.commit(transactionStatus);
 
-        if(!order.correctOrder())
+        if (!order.correctOrder())
             return 0;
-        List<Items> itemsList = order.getItemsList();
+        List<String> itemsList = order.getItemIdList();
         List<Integer> countList = order.getItemsCount();
         int size = itemsList.size();
-        for(int i = 0; i < size; i++){
+        for (int i = 0; i < size; i++) {
 
         }
         return 1;

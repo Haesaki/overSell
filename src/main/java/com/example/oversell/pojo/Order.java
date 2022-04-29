@@ -19,7 +19,7 @@ public class Order {
     private Integer postAmount;
     private Integer isComment;
     private Integer orderStatus;
-    private List<Items> itemsList;
+    private List<String> itemIdList;
     private List<Integer> itemsCount;
 
     @Override
@@ -32,14 +32,14 @@ public class Order {
                 ", postAmount=" + postAmount +
                 ", isComment=" + isComment +
                 ", orderStatus=" + orderStatus +
-                ", itemsList=" + itemsList +
+                ", itemsList=" + itemIdList +
                 ", itemsCount=" + itemsCount +
                 '}';
     }
 
     public boolean correctOrder() {
-        if (StringUtils.isBlank(orderId) || itemsList == null || itemsCount == null || itemsList.size() == 0
-                || itemsCount.size() == 0 || itemsList.size() != itemsCount.size())
+        if (StringUtils.isBlank(orderId) || itemIdList == null || itemsCount == null || itemIdList.size() == 0
+                || itemsCount.size() == 0 || itemIdList.size() != itemsCount.size())
             return false;
         if (createdTime == null)
             createdTime = new Date();

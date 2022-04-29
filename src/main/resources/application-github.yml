@@ -6,5 +6,5 @@ spring:
   redis:
     password: localhost
     host: localhost
-    port: 17177
+    port: 6255
     database: 0

@@ -7,12 +7,27 @@
         -->
         <id column="id" property="id" jdbcType="VARCHAR"/>
         <result column="item_name" property="itemName" jdbcType="VARCHAR"/>
-        <result column="cat_id" property="catId" jdbcType="INTEGER"/>
-        <result column="root_cat_id" property="rootCatId" jdbcType="INTEGER"/>
-        <result column="sell_counts" property="sellCounts" jdbcType="INTEGER"/>
-        <result column="on_off_status" property="onOffStatus" jdbcType="INTEGER"/>
+        <result column="stock" property="stock" jdbcType="INTEGER"/>
+        <result column="version" property="version" jdbcType="INTEGER"/>
         <result column="created_time" property="createdTime" jdbcType="TIMESTAMP"/>
         <result column="updated_time" property="updatedTime" jdbcType="TIMESTAMP"/>
-        <result column="content" property="content" jdbcType="LONGVARCHAR"/>
     </resultMap>
+
+    <select id="selectStockById" resultType="java.lang.Integer">
+        select stock
+        from items_version
+        where id = #{id}
+    </select>
+
+    <update id="updateStockById">
+        update items_version
+        set stock = #{leftCount}
+        where id = #{id}
+    </update>
+    <update id="updateStockByIdAndVersion">
+        update items_version
+        set stock = #{leftCount}
+        where id = #{id}
+          and version = #{version}
+    </update>
 </mapper>

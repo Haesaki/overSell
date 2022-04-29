@@ -10,7 +10,10 @@
 
 ### 单体架构
 
-PlatformTransactionManager: 主要是进行事务管理的操作, 如果不加上这个在函数内的事务操作,会导致当函数结束后,但是数据库的事务没有结束,这就导致别的线程可以获取到创建订单的这个函数的锁,并可能从数据库中获取到上一个线程获取到的结果,而不是上一个线程操作后的结果,导致超卖现象的产生. 需要手动控制事务的结束. 
+PlatformTransactionManager: 主要是进行事务管理的操作,
+如果不加上这个在函数内的事务操作,会导致当函数结束后,但是数据库的事务没有结束,这就导致别的线程可以获取到创建订单的这个函数的锁,并可能从数据库中获取到上一个线程获取到的结果,而不是上一个线程操作后的结果,导致超卖现象的产生.
+需要手动控制事务的结束.
+
 1. 方法锁: 利用在service的更新函数上面上一个锁,以及需要控制该函数在数据库提交后才能结束
    ```java
     @Autowired
@@ -72,29 +75,37 @@ PlatformTransactionManager: 主要是进行事务管理的操作, 如果不加�
         ...
    }
    ```
+
 ### 分布式结构
 
-4. 在数据库里面加上版本号 每次更新数据库里面的数据时候
-
-    1. 先去查询数据库里面的商品数目和版本号
-    2. 更新的时候利用版本号对更新操作进行限制
-
+4. 通过 select ... for update 访问同一条数据
+   方便,简单,易于理解,便于操作
+   并发量大, 对数据库的影响大
+5. [redis 分布式锁](https://redis.io/docs/reference/patterns/distributed-locks/)
+6. zookeeper 解决
 ## SQL
 
 items 建表SQL语句
 
 ```mysql
--- auto-generated definition
-create table items
+create table items_version
 (
-    id            varchar(64) not null comment '商品主键id' primary key,
-    item_name     varchar(32) not null comment '商品名称',
-    cat_id        int         not null comment '分类外键id',
-    root_cat_id   int         not null comment '一级分类外键id',
-    sell_counts   int         not null comment '累计销售',
-    on_off_status int         not null comment '上下架状态 1:上架 2:下架',
-    content       text        not null comment '商品内容',
-    created_time  datetime    not null comment '创建时间',
-    updated_time  datetime    not null comment '更新时间'
-)
+    id           varchar(64) not null comment '商品主键id'
+        primary key,
+    item_name    varchar(32) not null comment '商品名称',
+    stock        int         not null comment '库存',
+    version      int         not null comment '版本',
+    created_time datetime    not null comment '创建时间',
+    updated_time datetime    not null comment '更新时间'
+);
+```
+
+lua script
+
+```lua
+if redis.call("get".KEYS[1]) == ARGV[1] then
+   return redis.call("del", KEYS[1])
+else
+   return 0
+end
 ```

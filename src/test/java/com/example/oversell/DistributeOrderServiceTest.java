@@ -1,8 +1,10 @@
 package com.example.oversell;
 
+import com.example.oversell.mapper.ItemsMapper;
 import com.example.oversell.pojo.Items;
 import com.example.oversell.pojo.Order;
 import com.example.oversell.service.OrderService;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +18,33 @@ import java.util.concurrent.Executors;
 @SpringBootTest
 public class DistributeOrderServiceTest {
     @Autowired
-    OrderService orderService;
+    private OrderService orderService;
+
+    @Autowired
+    private ItemsMapper itemsMapper;
+
+    @Test
+    public void preTestRandom() throws Exception {
+        Random random = new Random();
+        int max = 0, min = Integer.MAX_VALUE;
+        for (int i = 0; i < 100000; i++) {
+            int r = random.nextInt(100); // 随机生成 0 - 99的随机数
+            max = Math.max(max, r);
+            min = Math.min(min, r);
+        }
+        System.out.println("max: " + max);
+        System.out.println("min: " + min);
+    }
+
+    @Test
+    public void preTestMysql() throws Exception {
+        String itemId = "test";
+        Integer original = itemsMapper.selectStockById(itemId);
+        Integer leftSellCount = 1000;
+        itemsMapper.updateStockById(itemId, leftSellCount);
+        Assertions.assertEquals(leftSellCount, itemsMapper.selectStockById(itemId));
+        itemsMapper.updateStockById(itemId, original);
+    }
 
     @Test
     public void placeOrderTest() throws Exception {
@@ -29,12 +57,12 @@ public class DistributeOrderServiceTest {
             ex.execute(() -> {
                 try {
                     cyclicBarrier.await();
-                    List<Items> itemsList = new LinkedList<>();
-                    itemsList.add(new Items("test", "simulate concurrent environment", 10, 0, 10, 1, new Date(), new Date(), "good"));
+                    List<String> itemsList = new LinkedList<>();
+                    itemsList.add("test");
                     List<Integer> itemsCount = new LinkedList<>();
-                    itemsCount.add(new Random().nextInt());
+                    itemsCount.add(new Random().nextInt(10));
                     Order placeO = new Order(UUID.randomUUID().toString(), new Date(), 1,
-                            0, 0, 0, 0, itemsList, new ArrayList<>());
+                            0, 0, 0, 0, itemsList, itemsCount);
                     int success = orderService.placeOrder(new Order());
                     if (success == 1)
                         System.out.println("Success" + placeO.toString());
